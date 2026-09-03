@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1A1A2E">
+    <title>TurnosPro — Calendario de Turnos</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <!-- Toast container -->
+    <div id="toast-container" aria-live="polite"></div>
+
+    <!-- Modal overlay -->
+    <div id="modal-overlay" class="modal-overlay hidden" onclick="cerrarModal(event)">
+        <div class="modal" id="modal-content" role="dialog" aria-modal="true"></div>
+    </div>
+
+    <!-- APP -->
+    <div id="app">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <span class="navbar-logo">✂</span>
+                <span class="navbar-title">TurnosPro</span>
+            </div>
+            <div class="navbar-links">
+                <button class="nav-link active" data-view="agenda" onclick="navegarA('agenda')">Agenda</button>
+                <button class="nav-link" data-view="formulario" onclick="navegarA('formulario')">Nuevo Turno</button>
+                <button class="nav-link" data-view="admin" onclick="navegarA('admin')">Admin</button>
+            </div>
+            <button class="btn btn-primary navbar-cta" onclick="navegarA('formulario')">+ Nuevo Turno</button>
+            <button class="navbar-burger" onclick="toggleMenu()" aria-label="Menú">☰</button>
+        </nav>
+
+        <!-- Mobile bottom bar -->
+        <div class="mobile-nav">
+            <button class="mobile-nav-item active" data-view="agenda" onclick="navegarA('agenda')">📅<br><span>Hoy</span></button>
+            <button class="mobile-nav-item" data-view="formulario" onclick="navegarA('formulario')">➕<br><span>Turno</span></button>
+            <button class="mobile-nav-item" data-view="admin" onclick="navegarA('admin')">⚙️<br><span>Admin</span></button>
+        </div>
+
+        <!-- Contenido principal -->
+        <main id="main-content" class="main-content">
+            <!-- Vista Agenda -->
+            <div id="view-agenda" class="view active">
+                <div class="view-header">
+                    <div class="view-nav">
+                        <button class="btn btn-ghost btn-sm" onclick="cambiarFecha(-1)">←</button>
+                        <h2 id="agenda-titulo" class="view-titulo">Septiembre 2026</h2>
+                        <button class="btn btn-ghost btn-sm" onclick="cambiarFecha(1)">→</button>
+                    </div>
+                    <div class="view-filters">
+                        <button class="chip active" data-filtro="todos" onclick="filtrarPeluquero('todos')">Todos</button>
+                        <div id="filtros-peluquero"></div>
+                    </div>
+                    <div class="view-tabs">
+                        <button class="view-tab active" data-vista="mes" onclick="cambiarVista('mes')">Mes</button>
+                        <button class="view-tab" data-vista="semana" onclick="cambiarVista('semana')">Semana</button>
+                    </div>
+                </div>
+
+                <!-- Vista Mensual -->
+                <div id="vista-mes" class="calendar-view active">
+                    <div class="cal-grid">
+                        <div class="cal-header">Dom</div>
+                        <div class="cal-header">Lun</div>
+                        <div class="cal-header">Mar</div>
+                        <div class="cal-header">Mié</div>
+                        <div class="cal-header">Jue</div>
+                        <div class="cal-header">Vie</div>
+                        <div class="cal-header">Sáb</div>
+                        <div id="cal-dias"></div>
+                    </div>
+                </div>
+
+                <!-- Vista Semanal -->
+                <div id="vista-semana" class="calendar-view">
+                    <div id="semana-grid" class="semana-grid"></div>
+                </div>
+            </div>
+
+            <!-- Vista Formulario -->
+            <div id="view-formulario" class="view">
+                <div class="form-container">
+                    <h2 class="form-title">Nuevo Turno</h2>
+                    <div class="progress-bar">
+                        <div class="progress-step active" data-paso="1"><span>1</span> Cliente</div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" data-paso="2"><span>2</span> Servicio</div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" data-paso="3"><span>3</span> Fecha y Hora</div>
+                    </div>
+
+                    <!-- Paso 1: Cliente -->
+                    <div class="form-step active" data-paso="1">
+                        <div class="form-group">
+                            <label class="form-label">Buscar cliente existente</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="input-cliente" class="form-input" placeholder="Nombre o teléfono..." autocomplete="off" oninput="buscarCliente(this.value)">
+                                <div id="cliente-resultados" class="autocomplete-list hidden"></div>
+                            </div>
+                        </div>
+                        <div class="form-divider">— o —</div>
+                        <button class="btn btn-ghost btn-block" onclick="mostrarNuevoCliente()">+ Crear nuevo cliente</button>
+                    </div>
+
+                    <!-- Paso 2: Servicio -->
+                    <div class="form-step" data-paso="2">
+                        <div class="form-group">
+                            <label class="form-label">Seleccionar servicio</label>
+                            <div id="servicios-lista" class="chip-group"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Peluquero</label>
+                            <div id="peluqueros-lista" class="chip-group"></div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 3: Fecha y Hora -->
+                    <div class="form-step" data-paso="3">
+                        <div class="form-group">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" id="input-fecha" class="form-input" onchange="cargarDisponibilidad()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hora disponible</label>
+                            <div id="horarios-lista" class="chip-group">
+                                <p class="form-hint">Seleccione una fecha para ver horarios disponibles</p>
+                            </div>
+                            <div id="error-solapamiento" class="form-error hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Navegación del formulario -->
+                    <div class="form-actions">
+                        <button class="btn btn-ghost" id="btn-paso-anterior" onclick="pasoAnterior()" style="display:none">Anterior</button>
+                        <button class="btn btn-ghost" onclick="navegarA('agenda')">Cancelar</button>
+                        <button class="btn btn-primary" id="btn-paso-siguiente" onclick="pasoSiguiente()">Siguiente</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vista Admin -->
+            <div id="view-admin" class="view">
+                <h2 class="view-titulo">Panel de Administración</h2>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-total">0</div>
+                        <div class="stat-label">Turnos hoy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number stat-confirmado" id="stat-confirmados">0</div>
+                        <div class="stat-label">Confirmados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number stat-pendiente" id="stat-pendientes">0</div>
+                        <div class="stat-label">Pendientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number stat-en-curso" id="stat-en-curso">0</div>
+                        <div class="stat-label">En curso</div>
+                    </div>
+                </div>
+
+                <!-- Tabla de turnos -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Turnos de Hoy</h3>
+                        <div class="table-actions">
+                            <input type="text" id="buscar-turno" class="form-input input-sm" placeholder="🔍 Buscar..." oninput="filtrarTabla()">
+                            <button class="btn btn-ghost btn-sm" onclick="exportarCSV()">⬇ Exportar</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Cliente</th>
+                                    <th>Servicio</th>
+                                    <th>Peluquero</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-turnos"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Accesos rápidos -->
+                <div class="quick-actions">
+                    <div class="quick-action-card" onclick="navegarA('formulario')">
+                        <span class="quick-action-icon">➕</span>
+                        <span>Nuevo Turno</span>
+                    </div>
+                    <div class="quick-action-card" onclick="mostrarToast('ℹ️ Próximamente: Gestionar Clientes', 'info')">
+                        <span class="quick-action-icon">👤</span>
+                        <span>Clientes</span>
+                    </div>
+                    <div class="quick-action-card" onclick="mostrarToast('ℹ️ Próximamente: Gestionar Servicios', 'info')">
+                        <span class="quick-action-icon">✂</span>
+                        <span>Servicios</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

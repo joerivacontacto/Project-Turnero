@@ -1,0 +1,121 @@
+Query: work kanban task t_4368cacb
+Initializing agent...
+────────────────────────────────────────
+
+  ┊ 📋 preparing kanban_show…
+  ┊ ⚡ kanban_sh   0.0s
+  ┊ 💻 preparing terminal…
+  ┊ 💻 $         ls -la  2.9s
+  ┊ ✍️ preparing write_file…
+  ┊ ✍️  write     /home/fulbo/.hermes/kanban/workspaces/t_4368cacb/requerimientos-calendario-turnos.md  1.2s
+  ┊ review diff
+a/requerimientos-calendario-turnos.md → b/requerimientos-calendario-turnos.md
+@@ -0,0 +1,194 @@
++# REQUERIMIENTOS: Sistema de Calendario de Turnos para Peluquería
++
++**Versión:** 1.0
++**Fecha:** 2026-09-01
++**Autor:** Valen (PM)
++**Ambito:** Sistema LOCAL, sin deploy en nube.
++
++---
++
++## 1. OBJETIVO
++
++Desarrollar un sistema local de gestión de turnos para una peluquería que permita agendar, visualizar y administrar reservas de servicios, asignación de peluqueros, gestión de clientes y envío de recordatorios. Todo el sistema corre en máquina local del negocio, sin dependencias de servicios cloud.
++
++---
++
++## 2. ALCANCE INCLUIDO (IN)
++
++- Calendario visual de turnos (vista diaria/semanal/mensual).
++- Tipos de turnos: corte, coloración, peinado (y combinaciones).
++- Definición de duración por tipo de servicio.
++- Asignación de peluqueros a turnos.
++- Gestión de clientes (alta, baja, modificación, historial).
++- Recordatorios automáticos (por email/SMS/WhatsApp — configurable).
++- Bloqueos de horarios (almuerzos, feriados, licencias).
++- Interfaz usable desde computadora de escritorio (no mobile-first, pero responsiva básica).
++- Persistencia local (base de datos archivo único, sin servidor externo).
++
++---
++
++## 3. ALCANCE EXCLUIDO (OUT)
++
++- Deploy en nube / hosting externo.
++- Aplicación móvil nativa.
++- Integración con pasarelas de pago.
++- Facturación electrónica / AFIP.
++- Acceso remoto desde internet.
++- Multi-sucursal.
++- App para clientes (solo panel administrativo del negocio).
++
++---
++
++## 4. ACTORES
++
++| Actor | Rol |
++|-------|-----|
++| Encargado/admin | Gestiona el sistema completo, crea usuarios, configura servicios |
++| Peluquero/a | Consulta su agenda, marca asistencia, ve historial propio |
++| Cliente (indirecto) | Recibe confirmaciones y recordatorios (no interactúa con el sistema directamente) |
++
++---
++
++## 5. REQUERIMIENTOS FUNCIONALES
++
++### 5.1 Gestión de Servicios y Duraciones
++
++- **RF-001:** El sistema debe permitir definir tipos de servicio con nombre, duración en minutos y precio de referencia.
++- **RF-002:** Servicios base obligatorios: Corte, Coloración, Peinado.
++- **RF-003:** Un turno puede combinar múltiples servicios (ej: corte + coloración). La duración del turno = suma de duraciones de servicios seleccionados + buffer configurable (default 10 min).
++- **RF-004:** Duraciones por defecto: Corte = 30 min, Coloración = 60 min, Peinado = 45 min. Editables por el admin.
++
++### 5.2 Calendario y Turnos
++
++- **RF-005:** Vista de calendario con granularidad diaria y semanal (mínimo).
++- **RF-006:** Crear turno: seleccionar cliente, servicio(s), peluquero, fecha, hora.
++- **RF-007:** El sistema NO debe permitir solapamiento de turnos para un mismo peluquero.
++- **RF-008:** El sistema debe validar horario de atención (ej: Lun-Sáb 9:00-20:00, configurable).
++- **RF-009:** Cancelar turno con motivo (obligatorio) y registro de quién canceló.
++- **RF-010:** Marcar turno como "asistió" / "no asistió" / "cancelado por cliente".
++
++### 5.3 Asignación de Peluqueros
++
++- **RF-011:** Cada turno tiene exactamente un peluquero asignado.
++- **RF-012:** El sistema debe mostrar la agenda individual de cada peluquero.
++- **RF-013:** Bloqueos por peluquero: vacaciones, licencias, feriados personales.
++- **RF-014:** Reasignación de turno a otro peluquero (arrastrar o editar).
++
++### 5.4 Gestión de Clientes
++
+… omitted 116 diff line(s) across 1 additional file(s)/section(s)
+  ┊ 💻 preparing terminal…
+  ┊ 💻 $         wc -l /home/fulbo/.hermes/kanban/workspaces/t_4368cacb/requerimientos-calendario-turnos.md  0.7s
+  ┊ ✔ preparing kanban_complete…
+  ┊ ⚡ kanban_co   0.2s
+
+╭─ ⚕ Hermes ───────────────────────────────────────────────────────────────────╮
+Listo. Documento de requerimientos creado y completado.
+
+Archivo: /home/fulbo/.hermes/kanban/workspaces/t_4368cacb/requerimientos-calendario-turnos.md
+194 líneas, 11 secciones
+
+Resumen del entregable:
+
+- 28 requerimientos funcionales — servicios (corte/coloración/peinado), calendario, turnos, peluqueros, clientes, recordatorios, login, reportes.
+- 15 requerimientos no funcionales — web local, SQLite, HTML/CSS/JS vanilla o framework ligero, bcrypt, offline-first.
+- 9 criterios de aceptación — tests automáticos de solapamiento, tiempos de respuesta, permisos por rol, auto-setup de BD.
+- Priorización MoSCoW — Must/Should/Could/Won't have claramente diferenciados.
+- Restricciones — mono-sucursal, PC local, sin internet garantizado, recordatorios solo cuando hay conexión.
+- Glosario — turno, servicio, buffer, baja lógica.
+
+Todo apunta a localhost, sin deploy en nube, como pidió el cuerpo del task.
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+Resume this session with:
+  hermes --resume 20260901_152854_9e3b1a -p valen
+
+Session:        20260901_152854_9e3b1a
+Duration:       4m 15s
+Messages:       12 (1 user, 10 tool calls)

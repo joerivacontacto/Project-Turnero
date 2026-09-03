@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframes: Calendario de Turnos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FAF7F2; color: #1A1A2E; }
+        
+        .wireframe-container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .wireframe-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        .wireframe-subtitle { font-size: 14px; color: #607D8B; margin-bottom: 32px; }
+        
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid #E0E0E0; padding-bottom: 8px; }
+        .nav-tab { padding: 8px 16px; border: none; background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: #607D8B; border-radius: 6px 6px 0 0; }
+        .nav-tab.active { background: #1A1A2E; color: white; }
+        
+        .wireframe-view { display: none; }
+        .wireframe-view.active { display: block; }
+        
+        /* Estilos de wireframe */
+        .wf-box { border: 2px dashed #BDBDBD; border-radius: 8px; padding: 16px; margin: 8px 0; background: white; }
+        .wf-box-solid { border: 1px solid #E0E0E0; border-radius: 8px; padding: 16px; margin: 8px 0; background: white; }
+        .wf-label { font-size: 11px; color: #9E9E9E; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .wf-text { font-size: 14px; color: #1A1A2E; }
+        .wf-text-sm { font-size: 12px; color: #607D8B; }
+        .wf-text-lg { font-size: 18px; font-weight: 600; }
+        
+        .wf-navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #1A1A2E; color: white; border-radius: 8px; margin-bottom: 16px; }
+        .wf-nav-links { display: flex; gap: 16px; }
+        .wf-nav-link { color: #B0BEC5; font-size: 14px; }
+        .wf-nav-link.active { color: white; font-weight: 600; }
+        
+        .wf-sidebar { width: 200px; float: left; margin-right: 16px; }
+        .wf-sidebar-item { padding: 12px 16px; font-size: 14px; color: #607D8B; border-left: 3px solid transparent; }
+        .wf-sidebar-item.active { border-left-color: #1A1A2E; color: #1A1A2E; font-weight: 600; background: #F5F5F5; }
+        
+        .wf-content { margin-left: 216px; }
+        
+        /* Vista mensual */
+        .wf-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .wf-calendar-header { text-align: center; font-size: 12px; font-weight: 600; color: #607D8B; padding: 8px; }
+        .wf-calendar-day { min-height: 80px; border: 1px solid #E0E0E0; border-radius: 4px; padding: 4px; background: white; }
+        .wf-calendar-day.other-month { background: #FAFAFA; color: #BDBDBD; }
+        .wf-calendar-day.today { border: 2px solid #2196F3; }
+        .wf-day-number { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+        .wf-day-event { font-size: 10px; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wf-event-pendiente { background: #E3F2FD; color: #1565C0; }
+        .wf-event-confirmado { background: #E8F5E9; color: #2E7D32; }
+        .wf-event-en-curso { background: #FFF3E0; color: #E65100; }
+        
+        /* Vista semanal */
+        .wf-week-grid { display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 1px; background: #E0E0E0; border-radius: 8px; overflow: hidden; }
+        .wf-week-time { background: #F5F5F5; padding: 8px; font-size: 11px; color: #607D8B; text-align: right; }
+        .wf-week-day-header { background: #1A1A2E; color: white; padding: 12px 8px; text-align: center; font-size: 12px; }
+        .wf-week-day-header.today { background: #2196F3; }
+        .wf-week-cell { background: white; min-height: 60px; padding: 4px; position: relative; }
+        .wf-week-event { font-size: 10px; padding: 4px; border-radius: 4px; margin-bottom: 2px; border-left: 3px solid; }
+        
+        /* Formulario */
+        .wf-form-group { margin-bottom: 16px; }
+        .wf-form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .wf-form-input { width: 100%; padding: 10px 12px; border: 1px solid #CCC; border-radius: 6px; font-size: 14px; }
+        .wf-form-input:focus { border-color: #2196F3; outline: 2px solid rgba(33,150,243,0.2); }
+        .wf-form-error { border-color: #F44336; }
+        .wf-form-error-msg { font-size: 12px; color: #F44336; margin-top: 4px; }
+        
+        .wf-chip { display: inline-block; padding: 8px 16px; border: 1px solid #BDBDBD; border-radius: 16px; font-size: 13px; margin: 4px; cursor: pointer; }
+        .wf-chip.selected { background: #1A1A2E; color: white; border-color: #1A1A2E; }
+        
+        .wf-btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .wf-btn-primary { background: #1A1A2E; color: white; }
+        .wf-btn-success { background: #4CAF50; color: white; }
+        .wf-btn-danger { background: #F44336; color: white; }
+        .wf-btn-ghost { background: transparent; border: 1px solid #BDBDBD; color: #1A1A2E; }
+        
+        /* Panel admin */
+        .wf-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .wf-stat-card { background: white; border-radius: 8px; padding: 16px; border: 1px solid #E0E0E0; }
+        .wf-stat-number { font-size: 28px; font-weight: 700; }
+        .wf-stat-label { font-size: 12px; color: #607D8B; }
+        
+        .wf-table { width: 100%; border-collapse: collapse; }
+        .wf-table th { text-align: left; padding: 12px; font-size: 12px; color: #607D8B; border-bottom: 2px solid #E0E0E0; }
+        .wf-table td { padding: 12px; font-size: 13px; border-bottom: 1px solid #F0F0F0; }
+        
+        .wf-badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .wf-badge-pendiente { background: #E3F2FD; color: #1565C0; }
+        .wf-badge-confirmado { background: #E8F5E9; color: #2E7D32; }
+        .wf-badge-en-curso { background: #FFF3E0; color: #E65100; }
+        .wf-badge-completado { background: #ECEFF1; color: #455A64; }
+        .wf-badge-cancelado { background: #FFEBEE; color: #C62828; }
+        
+        /* Modal */
+        .wf-modal-overlay { background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .wf-modal { background: white; border-radius: 12px; padding: 24px; max-width: 480px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .wf-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .wf-modal-close { background: none; border: none; font-size: 20px; cursor: pointer; }
+        
+        /* Toast */
+        .wf-toast { position: fixed; top: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; color: white; font-size: 14px; z-index: 200; }
+        .wf-toast-success { background: #4CAF50; }
+        .wf-toast-error { background: #F44336; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .wf-sidebar { display: none; }
+            .wf-content { margin-left: 0; }
+            .wf-stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <h1 class="wireframe-title">Wireframes: Calendario de Turnos</h1>
+        <p class="wireframe-subtitle">Prototipo navegable · Diseño UX · 2026-09-01</p>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showView('mensual')">Vista Mensual</button>
+            <button class="nav-tab" onclick="showView('semanal')">Vista Semanal</button>
+            <button class="nav-tab" onclick="showView('formulario')">Formulario Reserva</button>
+            <button class="nav-tab" onclick="showView('admin')">Panel Admin</button>
+            <button class="nav-tab" onclick="showView('design-system')">Design System</button>
+        </div>
+        
+        <!-- VISTA MENSUAL -->
+        <div id="view-mensual" class="wireframe-view active">
+            <div class="wf-navbar">
+                <div class="wf-text-lg">✂ TurnosPro</div>
+                <div class="wf-nav-links">
+                    <span class="wf-nav-link active">Agenda</span>
+                    <span class="wf-nav-link">Clientes</span>
+                    <span class="wf-nav-link">Admin</span>
+                </div>
+                <button class="wf-btn wf-btn-primary">+ Nuevo Turno</button>
+            </div>
+            
+            <div class="wf-sidebar">
+                <div class="wf-sidebar-item active">📅 Hoy</div>
+                <div class="wf-sidebar-item">Semana</div>
+                <div class="wf-sidebar-item">Mes</div>
+                <div class="wf-sidebar-item">⚙ Admin</div>
+            </div>
+            
+            <div class="wf-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <button class="wf-btn wf-btn-ghost">←</button>
+                        <span class="wf-text-lg" style="margin: 0 16px;">Septiembre 2026</span>
+                        <button class="wf-btn wf-btn-ghost">→</button>
+                    </div>
+                    <div>
+                        <span class="wf-chip selected">Todos</span>
+                        <span class="wf-chip">Juana</span>
+                        <span class="wf-chip">María</span>
+                    </div>
+                </div>
+                
+                <div class="wf-calendar-grid">
+                    <div class="wf-calendar-header">Dom</div>
+                    <div class="wf-calendar-header">Lun</div>
+                    <div class="wf-calendar-header">Mar</div>
+                    <div class="wf-calendar-header">Mié</div>
+                    <div class="wf-calendar-header">Jue</div>
+                    <div class="wf-calendar-header">Vie</div>
+                    <div class="wf-calendar-header">Sáb</div>
+                    
+                    <div class="wf-calendar-day other-month"><div class="wf-day-number">30</div></div>
+                    <div class="wf-calendar-day other-month"><div class="wf-day-number">31</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">1</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">2</div></div>
+                    <div class="wf-calendar-day today"><div class="wf-day-number">3</div>
+                        <div class="wf-day-event wf-event-confirmado">09:00 María L.</div>
+                        <div class="wf-day-event wf-event-pendiente">11:00 Carlos G.</div>
+                    </div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">4</div>
+                        <div class="wf-day-event wf-event-confirmado">10:00 Laura M.</div>
+                    </div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">5</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">6</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">7</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">8</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">9</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">10</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">11</div></div>
+                    <div class="wf-calendar-day"><div class="wf-day-number">12</div></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- VISTA SEMANAL -->
+        <div id="view-semanal" class="wireframe-view">
+            <div class="wf-navbar">
+                <div class="wf-text-lg">✂ TurnosPro</div>
+                <div class="wf-nav-links">
+                    <span class="wf-nav-link active">Agenda</span>
+                    <span class="wf-nav-link">Clientes</span>
+                    <span class="wf-nav-link">Admin</span>
+                </div>
+                <button class="wf-btn wf-btn-primary">+ Nuevo Turno</button>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                    <button class="wf-btn wf-btn-ghost">←</button>
+                    <span class="wf-text-lg" style="margin: 0 16px;">31 Ago - 6 Sep, 2026</span>
+                    <button class="wf-btn wf-btn-ghost">→</button>
+                </div>
+                <div>
+                    <span class="wf-chip selected">Todos</span>
+                    <span class="wf-chip">Juana</span>
+                    <span class="wf-chip">María</span>
+                </div>
+            </div>
+            
+            <div class="wf-week-grid">
+                <div class="wf-week-day-header"></div>
+                <div class="wf-week-day-header">Lun 31</div>
+                <div class="wf-week-day-header today">Mar 1</div>
+                <div class="wf-week-day-header">Mié 2</div>
+                <div class="wf-week-day-header">Jue 3</div>
+                <div class="wf-week-day-header">Vie 4</div>
+                <div class="wf-week-day-header">Sáb 5</div>
+                
+                <!-- 08:00 -->
+                <div class="wf-week-time">08:00</div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                
+                <!-- 09:00 -->
+                <div class="wf-week-time">09:00</div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell">
+                    <div class="wf-week-event wf-event-confirmado" style="border-left-color: #4CAF50;">María López · Corte</div>
+                </div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                
+                <!-- 10:00 -->
+                <div class="wf-week-time">10:00</div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell">
+                    <div class="wf-week-event wf-event-pendiente" style="border-left-color: #2196F3;">Carlos G. · Coloración</div>
+                </div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                
+                <!-- 11:00 -->
+                <div class="wf-week-time">11:00</div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell">
+                    <div class="wf-week-event wf-event-en-curso" style="border-left-color: #FF9800;">Laura M. · Peinado</div>
+                </div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                
+                <!-- 12:00 -->
+                <div class="wf-week-time">12:00</div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+                <div class="wf-week-cell"></div>
+            </div>
+        </div>
+        
+        <!-- FORMULARIO DE RESERVA -->
+        <div id="view-formulario" class="wireframe-view">
+            <div class="wf-navbar">
+                <div class="wf-text-lg">✂ TurnosPro</div>
+                <div class="wf-nav-links">
+                    <span class="wf-nav-link">Agenda</span>
+                    <span class="wf-nav-link">Clientes</span>
+                    <span class="wf-nav-link">Admin</span>
+                </div>
+                <button class="wf-btn wf-btn-primary">+ Nuevo Turno</button>
+            </div>
+            
+            <div style="max-width: 600px; margin: 0 auto;">
+                <h2 class="wf-text-lg" style="margin-bottom: 24px;">Nuevo Turno</h2>
+                
+                <!-- Paso 1: Cliente -->
+                <div class="wf-box-solid">
+                    <div class="wf-label">Paso 1 de 3 · Cliente</div>
+                    <div class="wf-form-group">
+                        <label class="wf-form-label">Buscar cliente existente</label>
+                        <input type="text" class="wf-form-input" placeholder="Nombre o teléfono...">
+                        <div class="wf-text-sm" style="margin-top: 8px;">Resultados: María López (3333-3333), Carlos García (4444-4444)</div>
+                    </div>
+                    <div style="text-align: center; margin: 16px 0; color: #607D8B;">— o —</div>
+                    <button class="wf-btn wf-btn-ghost" style="width: 100%;">+ Crear nuevo cliente</button>
+                </div>
+                
+                <!-- Paso 2: Servicio -->
+                <div class="wf-box-solid" style="margin-top: 16px;">
+                    <div class="wf-label">Paso 2 de 3 · Servicio</div>
+                    <div class="wf-form-group">
+                        <label class="wf-form-label">Seleccionar servicio</label>
+                        <div>
+                            <span class="wf-chip selected">✂ Corte · 30m · $1500</span>
+                            <span class="wf-chip">🎨 Coloración · 60m · $3500</span>
+                            <span class="wf-chip">💇 Peinado · 45m · $2500</span>
+                        </div>
+                    </div>
+                    <div class="wf-form-group">
+                        <label class="wf-form-label">Peluquero</label>
+                        <div>
+                            <span class="wf-chip selected">Cualquiera</span>
+                            <span class="wf-chip">Juana</span>
+                            <span class="wf-chip">María</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 3: Fecha y Hora -->
+                <div class="wf-box-solid" style="margin-top: 16px;">
+                    <div class="wf-label">Paso 3 de 3 · Fecha y Hora</div>
+                    <div class="wf-form-group">
+                        <label class="wf-form-label">Fecha</label>
+                        <input type="date" class="wf-form-input" value="2026-09-03">
+                    </div>
+                    <div class="wf-form-group">
+                        <label class="wf-form-label">Hora disponible</label>
+                        <div>
+                            <span class="wf-chip">09:00</span>
+                            <span class="wf-chip selected">10:00</span>
+                            <span class="wf-chip">11:00</span>
+                            <span class="wf-chip">14:00</span>
+                            <span class="wf-chip">15:00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error de solapamiento -->
+                <div class="wf-box" style="margin-top: 16px; border-color: #F44336; background: #FFEBEE;">
+                    <div class="wf-label" style="color: #F44336;">⚠ Error de validación</div>
+                    <div class="wf-text">Este horario se superpone con el turno de María López (09:00-09:30). Seleccione otro horario.</div>
+                </div>
+                
+                <!-- Botones -->
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="wf-btn wf-btn-ghost" style="flex: 1;">Cancelar</button>
+                    <button class="wf-btn wf-btn-success" style="flex: 2;">✓ Confirmar Turno</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANEL ADMIN -->
+        <div id="view-admin" class="wireframe-view">
+            <div class="wf-navbar">
+                <div class="wf-text-lg">✂ TurnosPro</div>
+                <div class="wf-nav-links">
+                    <span class="wf-nav-link">Agenda</span>
+                    <span class="wf-nav-link">Clientes</span>
+                    <span class="wf-nav-link active">Admin</span>
+                </div>
+                <button class="wf-btn wf-btn-primary">+ Nuevo Turno</button>
+            </div>
+            
+            <h2 class="wf-text-lg" style="margin-bottom: 24px;">Panel de Administración</h2>
+            
+            <!-- Stats del día -->
+            <div class="wf-stats-grid">
+                <div class="wf-stat-card">
+                    <div class="wf-stat-number">8</div>
+                    <div class="wf-stat-label">Turnos hoy</div>
+                </div>
+                <div class="wf-stat-card">
+                    <div class="wf-stat-number" style="color: #4CAF50;">5</div>
+                    <div class="wf-stat-label">Confirmados</div>
+                </div>
+                <div class="wf-stat-card">
+                    <div class="wf-stat-number" style="color: #2196F3;">2</div>
+                    <div class="wf-stat-label">Pendientes</div>
+                </div>
+                <div class="wf-stat-card">
+                    <div class="wf-stat-number" style="color: #FF9800;">1</div>
+                    <div class="wf-stat-label">En curso</div>
+                </div>
+            </div>
+            
+            <!-- Tabla de turnos -->
+            <div class="wf-box-solid">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="font-size: 16px; font-weight: 600;">Turnos de Hoy</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" class="wf-form-input" placeholder="🔍 Buscar..." style="width: 200px;">
+                        <button class="wf-btn wf-btn-ghost">⬇ Exportar</button>
+                    </div>
+                </div>
+                
+                <table class="wf-table">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Servicio</th>
+                            <th>Peluquero</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>09:00</td>
+                            <td>María López</td>
+                            <td>Corte</td>
+                            <td>Juana</td>
+                            <td><span class="wf-badge wf-badge-confirmado">Confirmado</span></td>
+                            <td>
+                                <button class="wf-btn wf-btn-ghost" style="padding: 4px 8px; font-size: 12px;">✎</button>
+                                <button class="wf-btn wf-btn-danger" style="padding: 4px 8px; font-size: 12px;">✕</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>10:00</td>
+                            <td>Carlos García</td>
+                            <td>Coloración</td>
+                            <td>María</td>
+                            <td><span class="wf-badge wf-badge-pendiente">Pendiente</span></td>
+                            <td>
+                                <button class="wf-btn wf-btn-ghost" style="padding: 4px 8px; font-size: 12px;">✎</button>
+                                <button class="wf-btn wf-btn-danger" style="padding: 4px 8px; font-size: 12px;">✕</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>11:00</td>
+                            <td>Laura Martínez</td>
+                            <td>Peinado</td>
+                            <td>Juana</td>
+                            <td><span class="wf-badge wf-badge-en-curso">En curso</span></td>
+                            <td>
+                                <button class="wf-btn wf-btn-ghost" style="padding: 4px 8px; font-size: 12px;">✎</button>
+                                <button class="wf-btn wf-btn-danger" style="padding: 4px 8px; font-size: 12px;">✕</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Accesos rápidos -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px;">
+                <div class="wf-box-solid" style="text-align: center; cursor: pointer;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">👤</div>
+                    <div class="wf-text">Gestionar Clientes</div>
+                </div>
+                <div class="wf-box-solid" style="text-align: center; cursor: pointer;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">✂</div>
+                    <div class="wf-text">Gestionar Servicios</div>
+                </div>
+                <div class="wf-box-solid" style="text-align: center; cursor: pointer;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">⚙</div>
+                    <div class="wf-text">Configuración</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DESIGN SYSTEM -->
+        <div id="view-design-system" class="wireframe-view">
+            <h2 class="wf-text-lg" style="margin-bottom: 24px;">Design System</h2>
+            
+            <!-- Paleta -->
+            <div class="wf-box-solid">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Paleta de colores</h3>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div style="width: 100px; text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #1A1A2E; border-radius: 8px; margin: 0 auto;"></div>
+                        <div class="wf-text-sm" style="margin-top: 4px;">#1A1A2E</div>
+                        <div class="wf-text-sm">Carbón</div>
+                    </div>
+                    <div style="width: 100px; text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #FAF7F2; border: 1px solid #E0E0E0; border-radius: 8px; margin: 0 auto;"></div>
+                        <div class="wf-text-sm" style="margin-top: 4px;">#FAF7F2</div>
+                        <div class="wf-text-sm">Crema</div>
+                    </div>
+                    <div style="width: 100px; text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #4CAF50; border-radius: 8px; margin: 0 auto;"></div>
+                        <div class="wf-text-sm" style="margin-top: 4px;">#4CAF50</div>
+                        <div class="wf-text-sm">Verde</div>
+                    </div>
+                    <div style="width: 100px; text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #2196F3; border-radius: 8px; margin: 0 auto;"></div>
+                        <div class="wf-text-sm" style="margin-top: 4px;">#2196F3</div>
+                        <div class="wf-text-sm">Azul</div>
+                    </div>
+                    <div style="width: 100px; text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #FF9800; border-radius: 8px; margin: 0 auto;"></div>
+                        <div class="wf-text-sm" style="margin-top: 4px;">#FF9800</div>
+                        <div class="wf-text-sm">Naranja</div>
+                    </div>
+                    <div style="width: 100px; text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #F44336; border-radius: 8px; margin: 0 auto;"></div>
+                        <div class="wf-text-sm" style="margin-top: 4px;">#F44336</div>
+                        <div class="wf-text-sm">Rojo</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Componentes -->
+            <div class="wf-box-solid" style="margin-top: 16px;">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Componentes</h3>
+                
+                <div style="margin-bottom: 16px;">
+                    <div class="wf-label">Botones</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="wf-btn wf-btn-primary">Primary</button>
+                        <button class="wf-btn wf-btn-success">Success</button>
+                        <button class="wf-btn wf-btn-danger">Danger</button>
+                        <button class="wf-btn wf-btn-ghost">Ghost</button>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <div class="wf-label">Chips / Tags</div>
+                    <div>
+                        <span class="wf-chip">Default</span>
+                        <span class="wf-chip selected">Selected</span>
+                        <span class="wf-badge wf-badge-pendiente">Pendiente</span>
+                        <span class="wf-badge wf-badge-confirmado">Confirmado</span>
+                        <span class="wf-badge wf-badge-en-curso">En curso</span>
+                        <span class="wf-badge wf-badge-completado">Completado</span>
+                        <span class="wf-badge wf-badge-cancelado">Cancelado</span>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <div class="wf-label">Inputs</div>
+                    <div style="max-width: 300px;">
+                        <input type="text" class="wf-form-input" placeholder="Input normal">
+                        <input type="text" class="wf-form-input wf-form-error" style="margin-top: 8px;" placeholder="Input con error">
+                        <div class="wf-form-error-msg">Este campo es requerido</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showView(viewName) {
+            document.querySelectorAll('.wireframe-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

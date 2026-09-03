@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # ============================================================
+  # API + Frontend — FastAPI sirve la API REST y los estáticos
+  # ============================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: calendario-turnos
+    ports:
+      - "${APP_PORT:-8080}:8000"
+    volumes:
+      # SQLite persistente (no se pierde al reiniciar)
+      - db_data:/app/data
+      # Backups automáticos diarios
+      - backup_data:/app/backups
+      # Frontend estático (hot-reload en desarrollo)
+      - ./app/static:/app/app/static
+    environment:
+      - DATABASE_URL=sqlite:///./data/turnos.db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - TZ=${TZ:-America/Argentina/Buenos_Aires}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - BACKUP_HOUR=${BACKUP_HOUR:-3}
+      - BACKUP_MINUTE=${BACKUP_MINUTE:-0}
+      - RECORDATORIO_INTERVAL=${RECORDATORIO_INTERVAL:-60}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ============================================================
+  # Volúmenes persistentes
+# ============================================================
+volumes:
+  # Base de datos SQLite (archivo turnos.db)
+  db_data:
+    driver: local
+    name: calendario-db-data
+  # Backups automáticos (archivos .db con timestamp)
+  backup_data:
+    driver: local
+    name: calendario-backup-data
+
+# ============================================================
+  # Red interna
+# ============================================================
+networks:
+  default:
+    name: calendario-network
