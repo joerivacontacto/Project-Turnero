@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen Kanban — Sistema de Calendario de Turnos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 48px;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #607D8B;
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1A1A2E;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #E0E0E0;
+            padding-bottom: 8px;
+        }
+        .meta {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            background: #FAF7F2;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border-left: 3px solid #1A1A2E;
+        }
+        .meta-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #607D8B;
+            font-weight: 600;
+        }
+        .meta-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1A1A2E;
+            margin-top: 2px;
+        }
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .agent-card {
+            background: #FAF7F2;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #E0E0E0;
+            transition: all 0.2s;
+        }
+        .agent-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .agent-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1A1A2E;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .agent-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1A1A2E;
+        }
+        .agent-role {
+            font-size: 12px;
+            color: #607D8B;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .agent-task {
+            font-size: 13px;
+            color: #455A64;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .agent-deliverables {
+            font-size: 12px;
+            color: #607D8B;
+            line-height: 1.5;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 8px;
+        }
+        .status-ok { background: #E8F5E9; color: #2E7D32; }
+        .status-warn { background: #FFF3E0; color: #E65100; }
+        .status-err { background: #FFEBEE; color: #C62828; }
+        .diagram-container {
+            background: #FAF7F2;
+            border-radius: 10px;
+            padding: 24px;
+            margin-top: 20px;
+            border: 1px solid #E0E0E0;
+        }
+        .flow-section {
+            margin-top: 32px;
+        }
+        .finding-list {
+            list-style: none;
+            padding: 0;
+        }
+        .finding-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .finding-list li:last-child {
+            border-bottom: none;
+        }
+        .finding-icon {
+            font-size: 18px;
+            line-height: 1.4;
+        }
+        .finding-text {
+            font-size: 14px;
+            color: #455A64;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 32px;
+            margin-top: 20px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background: #E0E0E0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #1A1A2E;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #1A1A2E;
+        }
+        .timeline-time {
+            font-size: 12px;
+            color: #607D8B;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1A1A2E;
+        }
+        .timeline-desc {
+            font-size: 13px;
+            color: #607D8B;
+        }
+        .bug-fix {
+            background: #E8F5E9;
+            border-left: 3px solid #4CAF50;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .bug-fix-title {
+            font-weight: 600;
+            color: #2E7D32;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+        .bug-fix-desc {
+            font-size: 12px;
+            color: #455A64;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .highlight-box {
+            background: #FFF8E1;
+            border: 1px solid #FFC107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .highlight-title {
+            font-weight: 700;
+            color: #FF8F00;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .highlight-text {
+            font-size: 13px;
+            color: #455A64;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Resumen del Proyecto Kanban</h1>
+        <div class="subtitle">Sistema de Calendario de Turnos — Peluquería</div>
+
+        <div class="meta">
+            <div class="meta-item">
+                <div class="meta-label">Proyecto</div>
+                <div class="meta-value">Calendario de Turnos</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Alcance</div>
+                <div class="meta-value">100% Local / Sin nube</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Agentes</div>
+                <div class="meta-value">9 participantes</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Tareas</div>
+                <div class="meta-value">10 tareas kanban</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Estado</div>
+                <div class="meta-value">Correcciones aplicadas</div>
+            </div>
+        </div>
+
+        <h2>🏗️ Arquitectura del Sistema</h2>
+        <div class="diagram-container">
+            <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;margin:0 auto;display:block;">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon fill="#607D8B" points="0 0, 10 3.5, 0 7" />
+                    </marker>
+                </defs>
+                <rect x="10" y="10" width="200" height="80" rx="8" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+                <text x="110" y="35" text-anchor="middle" font-size="13" font-weight="600" fill="#1565C0">Navegador (Cliente)</text>
+                <text x="110" y="55" text-anchor="middle" font-size="11" fill="#1976D2">Agenda Web</text>
+                <text x="110" y="70" text-anchor="middle" font-size="11" fill="#1976D2">Panel Admin</text>
+                <text x="110" y="85" text-anchor="middle" font-size="11" fill="#1976D2">Service Worker</text>
+
+                <line x1="210" y1="50" x2="280" y2="50" stroke="#607D8B" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <text x="245" y="42" text-anchor="middle" font-size="10" fill="#607D8B">HTTP/REST</text>
+
+                <rect x="280" y="10" width="200" height="80" rx="8" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+                <text x="380" y="35" text-anchor="middle" font-size="13" font-weight="600" fill="#E65100">FastAPI (Python)</text>
+                <text x="380" y="55" text-anchor="middle" font-size="11" fill="#F57C00">Rutas API</text>
+                <text x="380" y="70" text-anchor="middle" font-size="11" fill="#F57C00">Servicios de Negocio</text>
+                <text x="380" y="85" text-anchor="middle" font-size="11" fill="#F57C00">Auth JWT</text>
+
+                <line x1="380" y1="90" x2="380" y2="120" stroke="#607D8B" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <rect x="280" y="120" width="200" height="60" rx="8" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+                <text x="380" y="145" text-anchor="middle" font-size="13" font-weight="600" fill="#2E7D32">SQLite + WAL Mode</text>
+                <text x="380" y="165" text-anchor="middle" font-size="11" fill="#388E3C">turnos.db</text>
+
+                <line x1="480" y1="50" x2="560" y2="50" stroke="#607D8B" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <rect x="560" y="10" width="180" height="80" rx="8" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+                <text x="650" y="35" text-anchor="middle" font-size="13" font-weight="600" fill="#6A1B9A">APScheduler</text>
+                <text x="650" y="55" text-anchor="middle" font-size="11" fill="#7B1FA2">Recordatorios</text>
+                <text x="650" y="70" text-anchor="middle" font-size="11" fill="#7B1FA2">Backup automático</text>
+
+                <line x1="650" y1="90" x2="650" y2="120" stroke="#607D8B" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <rect x="560" y="120" width="180" height="60" rx="8" fill="#ECEFF1" stroke="#607D8B" stroke-width="2"/>
+                <text x="650" y="145" text-anchor="middle" font-size="13" font-weight="600" fill="#37474F">Docker Compose</text>
+                <text x="650" y="165" text-anchor="middle" font-size="11" fill="#455A64">Volúmenes persistentes</text>
+            </svg>
+        </div>
+
+        <h2>👥 Participantes y Responsabilidades</h2>
+        <div class="agent-grid">
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">V</div>
+                    <div>
+                        <div class="agent-name">Valen</div>
+                        <div class="agent-role">PM / Project Manager</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tareas: t_fa2351d0, t_4368cacb</div>
+                <div class="agent-deliverables">
+                    Documento de requerimientos completo (21 RF, 7 RNF, DoD, MoSCoW). Define el alcance del sistema: gestión de turnos para peluquería 100% local.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">F</div>
+                    <div>
+                        <div class="agent-name">Fede</div>
+                        <div class="agent-role">Tech Lead</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_ff35cee7</div>
+                <div class="agent-deliverables">
+                    Arquitectura del sistema: stack FastAPI + SQLAlchemy + SQLite + JS vanilla + Docker. 28 endpoints REST, 8 entidades, 4 capas, 5 ADRs.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">S</div>
+                    <div>
+                        <div class="agent-name">Sofia</div>
+                        <div class="agent-role">UX Designer</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_55e47856</div>
+                <div class="agent-deliverables">
+                    Design system completo (paleta, tipografía, componentes). Wireframes navegables con 5 vistas. 10 decisiones UX justificadas.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">J</div>
+                    <div>
+                        <div class="agent-name">Jose</div>
+                        <div class="agent-role">Backend Developer</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_1ddf4a95</div>
+                <div class="agent-deliverables">
+                    API REST completa con 20 endpoints. Validaciones de negocio (solapamiento, transiciones, horarios). Refactor a sqlite3 built-in por bloqueo de pip.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">C</div>
+                    <div>
+                        <div class="agent-name">Cele</div>
+                        <div class="agent-role">Frontend Developer</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_75008de0</div>
+                <div class="agent-deliverables">
+                    SPA vanilla con calendario mensual/semanal, formulario 3 pasos, panel admin. Modo offline con datos demo.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">G</div>
+                    <div>
+                        <div class="agent-name">Gaston</div>
+                        <div class="agent-role">DevOps</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_e24f99d1</div>
+                <div class="agent-deliverables">
+                    Infraestructura Docker completa: docker-compose, Dockerfile, scripts start/stop/backup/reset, volúmenes persistentes, healthcheck.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">J</div>
+                    <div>
+                        <div class="agent-name">Juli</div>
+                        <div class="agent-role">QA Engineer</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_c1b14830</div>
+                <div class="agent-deliverables">
+                    Revisión estática exhaustiva. Detectó 5 bugs críticos de integración frontend-backend que impiden el flujo end-to-end.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">N</div>
+                    <div>
+                        <div class="agent-name">Nico</div>
+                        <div class="agent-role">Customer Success</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_f10632c7</div>
+                <div class="agent-deliverables">
+                    Validación con cliente real: 15/15 pruebas API exitosas. Confirmó 5 bugs críticos del frontend. Informe completo de estado del sistema.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-avatar">H</div>
+                    <div>
+                        <div class="agent-name">Herminio</div>
+                        <div class="agent-role">Director / Orquestador</div>
+                    </div>
+                </div>
+                <div class="agent-task">Tarea: t_4dec39c2</div>
+                <div class="agent-deliverables">
+                    Aplicó los 5 fixes críticos en frontend: hora_fin, peluquero_id no nulo, query param q, parser disponibilidad y ruta export CSV.
+                </div>
+                <span class="status-badge status-ok">✅ Completado</span>
+            </div>
+        </div>
+
+        <h2>⏱️ Línea de Tiempo</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 15:28</div>
+                <div class="timeline-title">Valen: Documento de Requerimientos</div>
+                <div class="timeline-desc">Definió el alcance del sistema: 21 requerimientos funcionales, 7 no funcionales, criterios de aceptación y restricciones.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 15:31</div>
+                <div class="timeline-title">Fede: Arquitectura del Sistema</div>
+                <div class="timeline-desc">Diseñó la arquitectura en 4 capas, stack tecnológico, modelo de datos, 28 endpoints y 5 ADRs.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 15:35</div>
+                <div class="timeline-title">Gaston: Infraestructura Docker</div>
+                <div class="timeline-desc">Configuró Docker Compose, Dockerfile, scripts de inicio/backup/reset, volúmenes persistentes.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 15:31</div>
+                <div class="timeline-title">Sofia: Diseño UX</div>
+                <div class="timeline-desc">Creó design system, wireframes navegables con 5 vistas y 10 decisiones UX justificadas.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 15:40</div>
+                <div class="timeline-title">Jose: Backend API</div>
+                <div class="timeline-desc">Implementó 20 endpoints REST, validaciones de negocio, JWT auth. Refactor a sqlite3 por bloqueo de pip.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 15:54</div>
+                <div class="timeline-title">Cele: Frontend SPA</div>
+                <div class="timeline-desc">Desarrolló SPA vanilla con calendario, formulario 3 pasos, panel admin. Modo demo offline.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 16:16</div>
+                <div class="timeline-title">Juli: QA — Revisión Estática</div>
+                <div class="timeline-desc">Detectó 5 bugs críticos de integración: campos faltantes, endpoints incorrectos, parámetros erróneos.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-01 — 16:26</div>
+                <div class="timeline-title">Nico: Validación con Cliente Real</div>
+                <div class="timeline-desc">Ejecutó 15 pruebas API (todas exitosas). Confirmó bugs del frontend. Veredicto: backend sólido, frontend no listo.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">2026-09-02 — 21:11</div>
+                <div class="timeline-title">Herminio: Aplicación de Correcciones</div>
+                <div class="timeline-desc">Corrigió los 5 bugs críticos del frontend para alinear contratos con el backend. Estado actual: pendiente verificación E2E con Docker.</div>
+            </div>
+        </div>
+
+        <h2>✅ Correcciones Aplicadas (Herminio)</h2>
+        <div class="flow-section">
+            <ul class="finding-list">
+                <li>
+                    <span class="finding-icon">1</span>
+                    <span class="finding-text">
+                        <strong>Bug 1 — <code>hora_fin</code> faltante en creación de turno:</strong> Ahora <code>crearTurno()</code> calcula y envía <code>hora_fin</code> a partir de <code>hora_inicio</code> + duración del servicio.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">2</span>
+                    <span class="finding-text">
+                        <strong>Bug 2 — <code>peluquero_id</code> nulo al elegir "Cualquiera":</strong> Ahora asigna el primer peluquero disponible cuando no se elige uno específico.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">3</span>
+                    <span class="finding-text">
+                        <strong>Bug 3 — Query param de búsqueda de clientes incorrecto:</strong> Cambiado de <code>?busqueda=</code> a <code>?q=</code> para coincidir con el backend.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">4</span>
+                    <span class="finding-text">
+                        <strong>Bug 4 — Parser de disponibilidad incorrecto:</strong> Ahora maneja correctamente la respuesta del backend (<code>Array.isArray(data) ? ... : (data.horarios || [])</code>).
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">5</span>
+                    <span class="finding-text">
+                        <strong>Bug 5 — Ruta de export CSV incorrecta:</strong> Corregida de <code>/export/dia</code> a <code>/admin/export/dia</code>.
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <h2>📊 Diagrama de Flujo de Trabajo</h2>
+        <div class="diagram-container">
+            <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:800px;margin:0 auto;display:block;">
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon fill="#1A1A2E" points="0 0, 10 3.5, 0 7" />
+                    </marker>
+                </defs>
+
+                <rect x="10" y="10" width="170" height="70" rx="6" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+                <text x="95" y="35" text-anchor="middle" font-size="12" font-weight="600" fill="#1565C0">Valen</text>
+                <text x="95" y="52" text-anchor="middle" font-size="11" fill="#1976D2">Requerimientos</text>
+                <text x="95" y="65" text-anchor="middle" font-size="10" fill="#1976D2">t_fa2351d0</text>
+
+                <rect x="210" y="10" width="170" height="70" rx="6" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+                <text x="295" y="35" text-anchor="middle" font-size="12" font-weight="600" fill="#E65100">Fede</text>
+                <text x="295" y="52" text-anchor="middle" font-size="11" fill="#F57C00">Arquitectura</text>
+                <text x="295" y="65" text-anchor="middle" font-size="10" fill="#F57C00">t_ff35cee7</text>
+
+                <rect x="410" y="10" width="170" height="70" rx="6" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+                <text x="495" y="35" text-anchor="middle" font-size="12" font-weight="600" fill="#6A1B9A">Sofia</text>
+                <text x="495" y="52" text-anchor="middle" font-size="11" fill="#7B1FA2">Diseño UX</text>
+                <text x="495" y="65" text-anchor="middle" font-size="10" fill="#7B1FA2">t_55e47856</text>
+
+                <rect x="610" y="10" width="170" height="70" rx="6" fill="#ECEFF1" stroke="#607D8B" stroke-width="2"/>
+                <text x="695" y="35" text-anchor="middle" font-size="12" font-weight="600" fill="#37474F">Gaston</text>
+                <text x="695" y="52" text-anchor="middle" font-size="11" fill="#455A64">DevOps / Docker</text>
+                <text x="695" y="65" text-anchor="middle" font-size="10" fill="#455A64">t_e24f99d1</text>
+
+                <line x1="180" y1="45" x2="210" y2="45" stroke="#1A1A2E" stroke-width="1.5" marker-end="url(#arrow)"/>
+                <line x1="380" y1="45" x2="410" y2="45" stroke="#1A1A2E" stroke-width="1.5" marker-end="url(#arrow)"/>
+                <line x1="580" y1="45" x2="610" y2="45" stroke="#1A1A2E" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+                <rect x="10" y="140" width="170" height="70" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+                <text x="95" y="165" text-anchor="middle" font-size="12" font-weight="600" fill="#2E7D32">Jose</text>
+                <text x="95" y="182" text-anchor="middle" font-size="11" fill="#388E3C">Backend API</text>
+                <text x="95" y="195" text-anchor="middle" font-size="10" fill="#388E3C">t_1ddf4a95</text>
+
+                <rect x="210" y="140" width="170" height="70" rx="6" fill="#FFEBEE" stroke="#F44336" stroke-width="2"/>
+                <text x="295" y="165" text-anchor="middle" font-size="12" font-weight="600" fill="#C62828">Cele</text>
+                <text x="295" y="182" text-anchor="middle" font-size="11" fill="#D32F2F">Frontend SPA</text>
+                <text x="295" y="195" text-anchor="middle" font-size="10" fill="#D32F2F">t_75008de0</text>
+
+                <rect x="410" y="140" width="170" height="70" rx="6" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+                <text x="495" y="165" text-anchor="middle" font-size="12" font-weight="600" fill="#E65100">Juli</text>
+                <text x="495" y="182" text-anchor="middle" font-size="11" fill="#F57C00">QA / Testing</text>
+                <text x="495" y="195" text-anchor="middle" font-size="10" fill="#F57C00">t_c1b14830</text>
+
+                <rect x="610" y="140" width="170" height="70" rx="6" fill="#FFF8E1" stroke="#FFC107" stroke-width="2"/>
+                <text x="695" y="165" text-anchor="middle" font-size="12" font-weight="600" fill="#FF8F00">Nico</text>
+                <text x="695" y="182" text-anchor="middle" font-size="11" fill="#FFA000">Validación Cliente</text>
+                <text x="695" y="195" text-anchor="middle" font-size="10" fill="#FFA000">t_f10632c7</text>
+
+                <line x1="180" y1="175" x2="210" y2="175" stroke="#1A1A2E" stroke-width="1.5" marker-end="url(#arrow)"/>
+                <line x1="295" y1="175" x2="295" y2="210" stroke="#1A1A2E" stroke-width="1.5"/>
+                <line x1="295" y1="210" x2="410" y2="210" stroke="#1A1A2E" stroke-width="1.5" marker-end="url(#arrow)"/>
+                <line x1="580" y1="175" x2="610" y2="175" stroke="#1A1A2E" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+                <rect x="300" y="240" width="200" height="30" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+                <text x="400" y="259" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D32">Backend Funcional</text>
+
+                <line x1="180" y1="210" x2="300" y2="240" stroke="#4CAF50" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+                <line x1="380" y1="210" x2="400" y2="240" stroke="#F44336" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+                <line x1="495" y1="210" x2="500" y2="240" stroke="#F44336" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+            </svg>
+        </div>
+
+        <h2>📝 Entregables por Agente</h2>
+        <div class="flow-section">
+            <ul class="finding-list">
+                <li>
+                    <span class="finding-icon">V</span>
+                    <span class="finding-text">
+                        <strong>Valen (PM):</strong> <code>requerimientos-calendario-turnos.md</code> — 21 requerimientos funcionales, 7 no funcionales, criterios MoSCoW, DoD medible.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">F</span>
+                    <span class="finding-text">
+                        <strong>Fede (Tech Lead):</strong> <code>arquitectura-calendario-turnos.md</code> — Stack definido, arquitectura 4 capas, modelo de datos, 28 endpoints, 5 ADRs.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">S</span>
+                    <span class="finding-text">
+                        <strong>Sofia (UX):</strong> <code>design-system.md</code>, <code>wireframes.html</code>, <code>ux-decisions.md</code> — Sistema de diseño completo + prototipo navegable.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">J</span>
+                    <span class="finding-text">
+                        <strong>Jose (Backend):</strong> <code>app/main.py</code>, <code>app/routes/</code>, <code>app/services/</code>, <code>app/database.py</code>, <code>init_db.py</code>, <code>API_CONTRACTS.md</code>, <code>test_api.py</code> — API completa verificada.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">C</span>
+                    <span class="finding-text">
+                        <strong>Cele (Frontend):</strong> <code>index.html</code>, <code>css/main.css</code>, <code>js/api.js</code>, <code>js/app.js</code> — SPA funcional con modo demo.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">G</span>
+                    <span class="finding-text">
+                        <strong>Gaston (DevOps):</strong> <code>docker-compose.yml</code>, <code>Dockerfile</code>, <code>start.sh</code>, <code>stop.sh</code>, <code>backup.sh</code>, <code>reset.sh</code>, <code>logs.sh</code>, <code>README.md</code>.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">J</span>
+                    <span class="finding-text">
+                        <strong>Juli (QA):</strong> Revisión estática con 5 bugs críticos identificados. Documentación en metadata del task.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">N</span>
+                    <span class="finding-text">
+                        <strong>Nico (Customer Success):</strong> <code>validation_report.md</code>, <code>test_client_flow.py</code>, <code>test_frontend_bugs.py</code> — Validación real del sistema.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">H</span>
+                    <span class="finding-text">
+                        <strong>Herminio (Director):</strong> Tarea <code>t_4dec39c2</code> — Aplicó los 5 fixes frontend y sincronizó contratos API.
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <h2>🔍 Hallazgos Clave</h2>
+        <div class="flow-section">
+            <ul class="finding-list">
+                <li>
+                    <span class="finding-icon">✅</span>
+                    <span class="finding-text">
+                        <strong>Backend sólido:</strong> API funcional con 20 endpoints, validaciones de solapamiento, transiciones de estado controladas, horarios laborables, ausencias. Todas las pruebas API pasaron (15/15).
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">✅</span>
+                    <span class="finding-text">
+                        <strong>Frontend actualizado:</strong> Se corrigieron los 5 bugs críticos de integración que impedían el flujo end-to-end.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">🏗️</span>
+                    <span class="finding-text">
+                        <strong>Arquitectura bien diseñada:</strong> Stack tecnológico apropiado, separación de capas, modelo de datos consistente, Docker funcional.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">🔒</span>
+                    <span class="finding-text">
+                        <strong>Seguridad implementada:</strong> JWT con PyJWT, hash de passwords con PBKDF2-SHA256, protección de rutas por rol.
+                    </span>
+                </li>
+                <li>
+                    <span class="finding-icon">🐳</span>
+                    <span class="finding-text">
+                        <strong>DevOps completo:</strong> Docker Compose con volúmenes persistentes, healthcheck, scripts de gestión (start/stop/backup/reset).
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <h2>📌 Próximos Pasos Recomendados</h2>
+        <div class="flow-section">
+            <ul class="finding-list">
+                <li>
+                    <span class="finding-icon">1</span>
+                    <span class="finding-text">Verificación E2E completa levantando el stack con Docker y ejecutando pruebas end-to-end.</span>
+                </li>
+                <li>
+                    <span class="finding-icon">2</span>
+                    <span class="finding-text">Sincronización final de contratos: confirmar que todos los nombres de campos y endpoints coinciden entre frontend y backend.</span>
+                </li>
+                <li>
+                    <span class="finding-icon">3</span>
+                    <span class="finding-text">Pruebas de aceptación con usuario real para validar flujos de reserva, edición y cancelación.</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
