@@ -1,6 +1,6 @@
 # 📋 Calendario de Turnos
 
-Sistema de gestión de turnos para peluquería — 100% local / sin nube.
+Sistema de gestión de turnos para comercio — 100% local / sin nube.
 
 - **Proyecto:** Calendario de Turnos
 - **Alcance:** 100% Local / Sin nube
